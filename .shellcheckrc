@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2023 Noah Fontes
+#
+# SPDX-License-Identifier: Apache-2.0
+
+disable=SC2016
+external-sources=true
