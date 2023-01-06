@@ -107,23 +107,23 @@ gpg_hardcopy::keyring::import_from_file() {
   wait $! || return $?
 }
 
-# Export the secret key from a keyring to standard output.
+# Run a command with status and command interaction connected to a given
+# function.
 #
 # Parameters:
-# - $1: The fingerprint of the key to export.
-# - $2: An optional passphrase to use to unlock the key.
-gpg_hardcopy::keyring::export_secret_key() (
-  local -a gpg_args_extra=()
-  if [[ -n ${2+defined} ]]; then
-    local passphrase
-    exec {passphrase}< <(printf '%s\n' "$2")
-    gpg_args_extra+=(
-      --pinentry-mode=loopback
-      --passphrase-fd="$passphrase"
-    )
-  fi
-  gpg --batch "${gpg_args_extra[@]}" --export-secret-keys -- "$1" || return $?
-)
+# - $1: The name of the function to start.
+# - ...: The arguments to the command.
+gpg_hardcopy::keyring::interact() {
+  local func="$1"
+  shift
+
+  coproc "$func"
+  local ret=0 pid=$COPROC_PID stdout=${COPROC[0]} stdin=${COPROC[1]}
+  { gpg --status-fd=5 --command-fd=6 "$@" 5<&0 6>&1 <&3 >&4 || ret=$?; } 3<&0 4>&1 <&"$stdin" >&"$stdout"
+  exec {stdin}>&-
+  wait "$pid" || return $?
+  return $ret
+}
 
 # Read key information from the keyring and print it as a JSON object.
 #

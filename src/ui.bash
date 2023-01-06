@@ -161,6 +161,7 @@ EOT
 
   local resp
   IFS= read -r -e -s -p "$1: " resp <&"$gpg_hardcopy__ui__in_fd" >&"$gpg_hardcopy__ui__out_fd" || return $?
+  printf '\n' >&"$gpg_hardcopy__ui__out_fd"
   printf '%s\n' "$resp"
 }
 

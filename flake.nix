@@ -12,8 +12,8 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = nixpkgs.lib.systems.flakeExposed;
 
-      perSystem = { pkgs, ... }: {
-        packages.default = with pkgs; stdenvNoCC.mkDerivation rec {
+      perSystem = { self', pkgs, ... }: {
+        packages.gpg-hardcopy = with pkgs; stdenvNoCC.mkDerivation rec {
           pname = "gpg-hardcopy";
           version = if self.sourceInfo ? rev then self.sourceInfo.rev else "dirty";
 
@@ -62,6 +62,13 @@
               --prefix PATH : ${lib.makeBinPath buildInputs} \
               --prefix OSFONTDIR : ${noto-fonts}/share/fonts
             runHook postInstall
+          '';
+        };
+        packages.default = self'.packages.gpg-hardcopy;
+        devShells.default = with pkgs; mkShell {
+          nativeBuildInputs = self'.packages.gpg-hardcopy.buildInputs ++ [ shellcheck ];
+          shellHook = ''
+            export OSFONTDIR="${noto-fonts}/share/fonts''${OSFONTDIR+":$OSFONTDIR"}"
           '';
         };
       };

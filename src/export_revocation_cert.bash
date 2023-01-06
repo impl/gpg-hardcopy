@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 . "$(dirname -- "${BASH_SOURCE[0]}")/armor.bash"
+. "$(dirname -- "${BASH_SOURCE[0]}")/keyring.bash"
 . "$(dirname -- "${BASH_SOURCE[0]}")/ui.bash"
 
 # Interact with the GnuPG process to generate a revocation certificate.
@@ -79,12 +80,9 @@ _gpg_hardcopy::export_revocation_cert::generate_cert_batch() (
       --passphrase-fd="$passphrase"
     )
   fi
-  coproc _gpg_hardcopy::export_revocation_cert::interactive_generate_cert
-  local ret=0 pid=$COPROC_PID stdout=${COPROC[0]} stdin=${COPROC[1]}
-  { gpg --no-tty --status-fd=5 --command-fd=6 "${gpg_args_extra[@]}" --gen-revoke -- "$1" 5<&0 6>&1 <&3 >&4 || ret=$?; } 3<&0 4>&1 <&"$stdin" >&"$stdout"
-  exec {stdin}>&-
-  wait "$pid" || return $?
-  return $ret
+
+  gpg_hardcopy::keyring::interact _gpg_hardcopy::export_revocation_cert::interactive_generate_cert \
+    --no-tty "${gpg_args_extra[@]}" --gen-revoke -- "$1" || return $?
 )
 
 # Generate an ASCII-armored revocation certificate for a secret key.

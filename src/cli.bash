@@ -16,7 +16,7 @@ EOT
   fi
 
   local opts
-  opts=$(getopt --options e:hk: --longoptions batch,export:,help,key:,no-batch,passphrase-fd: --name "$0" -- "$@") || {
+  opts="$(getopt --options e:hk: --longoptions batch,export:,help,key:,no-batch,passphrase-fd: --name "$0" -- "$@")" || {
     cat >&2 <<EOT
 
 You didn't provide valid command-line arguments. Try running with --help to see
