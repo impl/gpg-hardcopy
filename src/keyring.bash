@@ -74,7 +74,7 @@ gpg_hardcopy::keyring::list::secret() {
         fi
         ;;
       uid)
-        if [[ -z "$current_uid" && "${line[1]}" == 'u' ]]; then
+        if [[ -z "$current_uid" && "${line[1]}" != 'r' ]]; then
           current_uid="${line[9]}"
         fi
         ;;
